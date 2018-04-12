@@ -1,0 +1,1 @@
+cmd_/home/sidarth/pmem/module/pcall.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/sidarth/pmem/module/pcall.ko /home/sidarth/pmem/module/pcall.o /home/sidarth/pmem/module/pcall.mod.o ;  true

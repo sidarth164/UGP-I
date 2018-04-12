@@ -1,0 +1,1 @@
+cmd_/home/sidarth/pmem/module/hello_use_export.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/sidarth/pmem/module/hello_use_export.ko /home/sidarth/pmem/module/hello_use_export.o /home/sidarth/pmem/module/hello_use_export.mod.o ;  true

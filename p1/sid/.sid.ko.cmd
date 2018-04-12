@@ -1,0 +1,1 @@
+cmd_/home/sidarth/pmem/p1/sid/sid.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/sidarth/pmem/p1/sid/sid.ko /home/sidarth/pmem/p1/sid/sid.o /home/sidarth/pmem/p1/sid/sid.mod.o ;  true
