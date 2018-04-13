@@ -1,0 +1,101 @@
+[22583.523480] DEBUG: Device opened successfully by mmap_basic_2
+[22583.523484] mmap called
+[22583.523485] DEBUG: Inserting a new node (with id mmap_basic_255554048) in the vm_tree
+[22583.523486] DEBUG: Mapping 13 persistent pages
+[22583.523486] DEBUG: vm_open called
+[22583.523487] DEBUG: vma opened pid = 7348
+[22583.524270] DEBUG: vm_fault called
+[22583.524271] alloc_pages with GFP_PM flag called
+[22583.524272] DEBUG: palloc_pages() called
+[22583.524281] DEBUG: [2] Successfully transferred page 678928 from free list to used tree
+               refcount = 1
+[22583.524282] DEBUG: Got persistent page to allocate to vm at address 55558144
+[22583.524282] DEBUG: Page with offset no. 1 is allocated
+[22583.524282] DEBUG: vma fault pid = 7348
+[22583.524557] DEBUG: vm_fault called
+[22583.524557] alloc_pages with GFP_PM flag called
+[22583.524558] DEBUG: palloc_pages() called
+[22583.524562] DEBUG: [1] Successfully transferred page 678929 from free list to used tree
+               refcount = 1
+[22583.524563] DEBUG: Got persistent page to allocate to vm at address 55586816
+[22583.524563] DEBUG: Page with offset no. 8 is allocated
+[22583.524563] DEBUG: vma fault pid = 7348
+[22623.573257] DEBUG: backup_timer_callback() function called
+[22623.573286] DEBUG: Taking backup of used memory pages into backup file
+[22623.573305] DEBUG: [2]page: 678928 is dirty
+[22623.573342] DEBUG: [1]page: 678929 is dirty
+[22623.573357] DEBUG: Taking backup successfull
+[22629.703317] DEBUG: Device opened successfully by mmap_basic
+[22629.703321] mmap called
+[22629.703322] DEBUG: Inserting a new node (with id mmap_basic55554048) in the vm_tree
+[22629.703323] DEBUG: Mapping 13 persistent pages
+[22629.703323] DEBUG: vm_open called
+[22629.703323] DEBUG: vma opened pid = 7367
+[22629.703884] DEBUG: vm_fault called
+[22629.703885] alloc_pages with GFP_PM flag called
+[22629.703886] DEBUG: palloc_pages() called
+[22629.703895] DEBUG: [0] Successfully transferred page 678930 from free list to used tree
+               refcount = 1
+[22629.703895] DEBUG: Got persistent page to allocate to vm at address 55554048
+[22629.703896] DEBUG: Page with offset no. 0 is allocated
+[22629.703896] DEBUG: vma fault pid = 7367
+[22629.704140] DEBUG: vm_fault called
+[22629.704149] alloc_pages with GFP_PM flag called
+[22629.704150] DEBUG: palloc_pages() called
+[22629.704154] DEBUG: [3] Successfully transferred page 678927 from free list to used tree
+               refcount = 1
+[22629.704155] DEBUG: Got persistent page to allocate to vm at address 55578624
+[22629.704155] DEBUG: Page with offset no. 6 is allocated
+[22629.704156] DEBUG: vma fault pid = 7367
+[22664.052779] DEBUG: vm_close called
+[22664.052781] DEBUG: page with offset 0 is null
+[22664.052781] DEBUG: freeing persistent page
+[22664.052782] Page: 18446735152032187392 is persistent and hence pmem_free() called
+[22664.052783] DEBUG: pfree_pages() called
+[22664.052803] DEBUG: [2] Successfully transferred page 678928 from used tree to free list
+[22664.052804] Page free successfull
+[22664.052804] DEBUG: page with offset 2 is null
+[22664.052804] DEBUG: page with offset 3 is null
+[22664.052805] DEBUG: page with offset 4 is null
+[22664.052805] DEBUG: page with offset 5 is null
+[22664.052806] DEBUG: page with offset 6 is null
+[22664.052806] DEBUG: page with offset 7 is null
+[22664.052806] DEBUG: freeing persistent page
+[22664.052807] Page: 18446735152032187456 is persistent and hence pmem_free() called
+[22664.052807] DEBUG: pfree_pages() called
+[22664.052809] DEBUG: [1] Successfully transferred page 678929 from used tree to free list
+[22664.052809] Page free successfull
+[22664.052810] DEBUG: page with offset 9 is null
+[22664.052810] DEBUG: page with offset 10 is null
+[22664.052811] DEBUG: page with offset 11 is null
+[22664.052811] DEBUG: page with offset 12 is null
+[22664.052811] DEBUG: Freed the vmnode->pg array
+[22664.052812] DEBUG: vmnode (with id mmap_basic_255554048) removed successfully
+[22664.052813] DEBUG: vma closed pid = 7348
+[22664.052818] DEBUG: Device closed successfully
+[22672.177786] DEBUG: vm_close called
+[22672.177788] DEBUG: freeing persistent page
+[22672.177789] Page: 18446735152032187520 is persistent and hence pmem_free() called
+[22672.177790] DEBUG: pfree_pages() called
+[22672.177812] DEBUG: [0] Successfully transferred page 678930 from used tree to free list
+[22672.177812] Page free successfull
+[22672.177813] DEBUG: page with offset 1 is null
+[22672.177814] DEBUG: page with offset 2 is null
+[22672.177814] DEBUG: page with offset 3 is null
+[22672.177815] DEBUG: page with offset 4 is null
+[22672.177815] DEBUG: page with offset 5 is null
+[22672.177816] DEBUG: freeing persistent page
+[22672.177816] Page: 18446735152032187328 is persistent and hence pmem_free() called
+[22672.177817] DEBUG: pfree_pages() called
+[22672.177820] DEBUG: [3] Successfully transferred page 678927 from used tree to free list
+[22672.177821] Page free successfull
+[22672.177821] DEBUG: page with offset 7 is null
+[22672.177822] DEBUG: page with offset 8 is null
+[22672.177822] DEBUG: page with offset 9 is null
+[22672.177823] DEBUG: page with offset 10 is null
+[22672.177823] DEBUG: page with offset 11 is null
+[22672.177824] DEBUG: page with offset 12 is null
+[22672.177824] DEBUG: Freed the vmnode->pg array
+[22672.177826] DEBUG: vmnode (with id mmap_basic55554048) removed successfully
+[22672.177826] DEBUG: vma closed pid = 7367
+[22672.177834] DEBUG: Device closed successfully

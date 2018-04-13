@@ -27,18 +27,18 @@ int main()
         exit(-1);
   }
   
-  printf("Process mmap_basic\n");
+  printf("Process mmap_basic_2\n");
 
-  memcpy(ptr, "hellokern",10);
-  memcpy(buf, ptr, 10);
+  memcpy(ptr+5000, "hellokern",10);
+  memcpy(buf, ptr+5000, 10);
   printf("Read 1 %s\n", buf);
 
-  memcpy(ptr+25000, "kernhello",10);
-  memcpy(buf, ptr+25000, 10);
+  memcpy(ptr+35000, "kernhello",10);
+  memcpy(buf, ptr+35000, 10);
   printf("Read II %s\n", buf);
 
-  /* Waiting for a dummy input - mainly to pause the process */
-  scanf("%s", buf);
+/* Wait for a dummy input - mainly for pausing the process */
+  scanf("%s",buf);
   munmap(ptr, 53428);
   close(fd);
   return 0;  

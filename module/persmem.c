@@ -361,7 +361,7 @@ void restore_state(void)
 
 struct page *palloc_pages(unsigned int order, char id[55])
 {
-	struct used_tree *unode = kmalloc(sizeof(struct used_tree), GFP_KERNEL);
+	struct used_tree *unode; 
 	struct rb_node *node;
 	struct page *pg;
 	struct free_list *l;
@@ -381,6 +381,7 @@ struct page *palloc_pages(unsigned int order, char id[55])
 
 	/* Since there is no such page in used-tree structure */	
 	strcat(meta,id);
+	unode = kmalloc(sizeof(struct used_tree), GFP_KERNEL);
 
 	/* allocate free pages (currently only 1) from the persistent region */
 	printk(KERN_INFO "DEBUG: palloc_pages() called\n");
@@ -486,6 +487,10 @@ void take_backup(void){
 
 	for (node = rb_first(&p_area->mytree); node; node = rb_next(node)){
 		struct used_tree *unode = rb_entry(node, struct used_tree, node);
+		if(unode==NULL){
+			printk(KERN_INFO "Error: a node in used tree was null\n");
+			return;
+		}
 		if(TestClearPageDirty(unode->pg)){
 			printk(KERN_INFO "DEBUG: [%lu]page: %lu is dirty\n", unode->offs_no, unode->pfn);
 			file_write(p_area->bf->fp, unode->offs_no * (PAGE_SIZE+METADATA_SIZE) + METADATA_SIZE, (char*) page_address(unode->pg), PAGE_SIZE);
