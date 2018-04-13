@@ -32,12 +32,10 @@ int main()
   memcpy(ptr, "hellokern",10);
   memcpy(buf, ptr, 10);
   printf("Read 1 %s\n", buf);
-  ptr+=4086;
 
   memcpy(ptr, "kernhello",10);
   memcpy(buf, ptr, 10);
   printf("Read II %s\n", buf);
-  ptr-=4086;
   munmap(ptr, 4096);
   close(fd);
   return 0;  

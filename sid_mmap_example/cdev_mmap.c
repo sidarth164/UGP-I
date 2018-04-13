@@ -20,7 +20,7 @@
 
 static int major;
 atomic_t  device_opened;
-struct page**pg;
+struct page **pg;
 int num_vmpages;
 
 static int demo_open(struct inode *inode, struct file *file)
@@ -43,14 +43,17 @@ static int demo_release(struct inode *inode, struct file *file)
 static void vm_close(struct vm_area_struct *vma)
 {
 	int i;
-	for(i=0; i<num_vmpages; i++){
-		if(pg[i]){
-			printk(KERN_INFO "DEBUG: freeing persistent page\n");
-			__free_pages(pg[i], 0);
+	if((current->flags & PF_EXITING) != PF_EXITING)
+		for(i=0; i<num_vmpages; i++){
+			if(pg[i]){
+				printk(KERN_INFO "DEBUG: freeing persistent page\n");
+				__free_pages(pg[i], 0);
+			}
+			else
+				printk(KERN_INFO "DEBUG: page with offset %d is null\n", i);
 		}
-		else
-			printk(KERN_INFO "DEBUG: page with offset %d is null\n", i);
-	}
+	else
+		printk(KERN_INFO "Exiting the process\n");
 	kfree(pg);
 	printk(KERN_INFO "DEBUG: Freed the *pg array\n");
     printk(KERN_INFO "DEBUG: vma closed pid = %d\n", current->pid);
@@ -58,8 +61,11 @@ static void vm_close(struct vm_area_struct *vma)
 
 static int vm_fault(struct vm_fault *vmf)
 {
+	char id[55];
 	int offset = (vmf->address - vmf->vma->vm_start)/PAGE_SIZE;
-	get_page(pg[offset]);
+	sprintf(id, "%s%lu%d", current->comm, vmf->vma->vm_start, offset);
+	pg[offset] = alloc_page_pm(GFP_PM, 0, id);
+	// get_page(pg[offset]);
 
     vmf->page = pg[offset];
 	printk(KERN_INFO "DEBUG: Page with offset no. %d is allocated\n", offset);
@@ -70,13 +76,9 @@ static int vm_fault(struct vm_fault *vmf)
 static void vm_open(struct vm_area_struct *vma)
 {
 	int i;
-	char id[55];
     printk(KERN_INFO "DEBUG: vma opened pid = %d\n", current->pid);
 	for(i=0; i<num_vmpages; i++){
-		sprintf(id, "%s%lu%d", current->comm, vma->vm_start, i);
-		pg[i] = alloc_page_pm(GFP_PM, 0, id);
-		if(pg[i]==NULL)
-			printk(KERN_INFO "Problem in allocating page from persistent area\n");
+		pg[i] = NULL;
 	}
 
 }
