@@ -11,14 +11,14 @@
 static int num_pages = 10;
 struct page *pg[100];
 
-extern struct page* palloc_pages(unsigned int order, char id[17]);
+extern struct page* palloc_pages(unsigned int order, char id[55]);
 extern void pfree_pages(struct page* pg, unsigned int order);
 extern void take_backup(void);
 
 static int __init pcall_init(void)
 {
 	int i=0;
-	char id[17]="pcall";
+	char id[55]="pcall";
 	char page_num[9];
 	printk(KERN_INFO "We shall be allocating and freeing %d persistent pages in this module\n", num_pages);
 

@@ -1,1 +1,0 @@
-This is a file to check if read/write function is working correctly.

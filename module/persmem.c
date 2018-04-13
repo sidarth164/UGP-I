@@ -71,7 +71,7 @@ struct used_tree {
 	struct page *pg;
 	unsigned long offs_no;
 	unsigned long pfn;
-	char id[17];
+	char id[55];
 };
 
 static char* bf_name = "backup";
@@ -221,22 +221,22 @@ void get_freepages(void)
 void freepages(void)
 {
 	long i=0;
+	struct rb_node *node = rb_first(&p_area->mytree);
 	printk(KERN_INFO "DEBUG: Freeing pages\n");
+
 	while(p_area->head)	{
 		struct free_list* l;
 		unsigned long offs_no = p_area->head->offs_no;
-		i++;
-	//	printk(KERN_INFO "DEBUG: freeing page %lu\n", offs_no);
 
 		if(p_area->head->pg) {
 			ClearPagePersistent(p_area->head->pg);
 			__free_pages(p_area->head->pg,0);
+			i++;
 		}
 		else{
 			printk(KERN_INFO "[%lu] No page to free!!\n", offs_no);
 			return;
 		}
-		
 		l = p_area->head;
 		p_area->head=p_area->head->next;
 		if(p_area->head) {
@@ -247,6 +247,22 @@ void freepages(void)
 		}
 		else
 			printk(KERN_INFO "[%lu] Problem in removing this node\n",offs_no);
+	}
+
+	while(node){
+		struct used_tree *unode = rb_entry(node, struct used_tree, node);
+		if(unode->pg){
+			ClearPagePersistent(unode->pg);
+			__free_pages(unode->pg,0);
+			i++;
+		}
+		else{
+			printk(KERN_INFO "[%lu] No page to free!!, id=%s\n", unode->offs_no, unode->id);
+			return;
+		}
+		rb_erase(&unode->node,&p_area->mytree);
+		kfree(unode);
+		node=rb_first(&p_area->mytree);
 	}
 
 	printk(KERN_INFO "DEBUG: Total freed pages - %lu\n", i);
@@ -314,7 +330,6 @@ void restore_state(void)
 			struct free_list *used=l;
 			bool res;
 
-			printk(KERN_INFO "DEBUG: page type: %s\n", isfree);
 			file_read(p_area->bf->fp, l->offs_no * (PAGE_SIZE+METADATA_SIZE), meta, METADATA_SIZE);
 			file_read(p_area->bf->fp, l->offs_no * (PAGE_SIZE+METADATA_SIZE) + METADATA_SIZE, (char*) page_address(l->pg), PAGE_SIZE);
 
@@ -344,7 +359,7 @@ void restore_state(void)
 	printk(KERN_INFO "DEBUG: Restoration successfull\n");
 }
 
-struct page *palloc_pages(unsigned int order, char id[17])
+struct page *palloc_pages(unsigned int order, char id[55])
 {
 	struct used_tree *unode = kmalloc(sizeof(struct used_tree), GFP_KERNEL);
 	struct rb_node *node;
@@ -429,6 +444,41 @@ void pfree_pages(struct page *page, unsigned int order)
 }
 EXPORT_SYMBOL(pfree_pages);
 
+void flush_used_pages(void)
+{
+	struct rb_node *node = rb_first(&p_area->mytree);
+	struct page *pg;
+	unsigned long offs_no;
+	bool res;
+	char meta[64]="free";
+
+	while(node){
+		struct used_tree *unode = rb_entry(node, struct used_tree, node);
+
+		if(!unode) {
+			printk(KERN_INFO "Node not found\n");
+			return;
+		}
+		file_write(p_area->bf->fp, unode->offs_no * (PAGE_SIZE+METADATA_SIZE), meta, METADATA_SIZE);
+	
+		pg = unode->pg;
+		offs_no = unode->offs_no;
+		rb_erase(&unode->node,&p_area->mytree);
+		kfree(unode);
+	
+		res = add_page_to_freelist(pg,offs_no);
+		PM_ASSERT(res==true);
+		if(res == FALSE) {
+			printk(KERN_INFO "Error in adding page %lu to free list\n", page_to_pfn(pg));
+			return;
+		}
+	
+		printk(KERN_INFO "DEBUG: [%lu] Successfully transferred page %lu from used tree to free list\n", offs_no, page_to_pfn(pg));
+		node = rb_first(&p_area->mytree);
+	}
+}	
+EXPORT_SYMBOL(flush_used_pages);
+
 void take_backup(void){
 	/* copy contents of *used* memory to backup file*/
 	struct rb_node *node;
@@ -443,7 +493,7 @@ void take_backup(void){
 		else
 			printk(KERN_INFO "DEBUG: [%lu]page: %lu is NOT dirty\n", unode->offs_no, unode->pfn);
 	}
-	
+
 	printk(KERN_INFO "DEBUG: Taking backup successfull\n");
 }
 EXPORT_SYMBOL(take_backup);
@@ -484,9 +534,7 @@ static int __init pmem_init(void)
 	get_freepages();
 
 	/* Restoring persistent area state */
-	printk(KERN_INFO "DEBUG: Calling restore_state()\n");
 	restore_state();
-	printk(KERN_INFO "DEBUG: Returned from restore_state()\n");
 	
 	pmem_alloc = palloc_pages;
 	pmem_free = pfree_pages;

@@ -1,0 +1,1 @@
+cmd_/home/sidarth/pmem/sid_mmap_example/cdev_mmap.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/sidarth/pmem/sid_mmap_example/cdev_mmap.ko /home/sidarth/pmem/sid_mmap_example/cdev_mmap.o /home/sidarth/pmem/sid_mmap_example/cdev_mmap.mod.o ;  true

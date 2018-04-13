@@ -1,4 +1,4 @@
 0x00000000	pfree_pages	/home/sidarth/pmem/module/persmem	EXPORT_SYMBOL
-0x00000000	hello_export	/home/sidarth/pmem/module/hello_export	EXPORT_SYMBOL
+0x00000000	flush_used_pages	/home/sidarth/pmem/module/persmem	EXPORT_SYMBOL
 0x00000000	palloc_pages	/home/sidarth/pmem/module/persmem	EXPORT_SYMBOL
 0x00000000	take_backup	/home/sidarth/pmem/module/persmem	EXPORT_SYMBOL

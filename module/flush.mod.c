@@ -22,5 +22,5 @@ MODULE_INFO(retpoline, "Y");
 static const char __module_depends[]
 __used
 __attribute__((section(".modinfo"))) =
-"depends=hello_export";
+"depends=persmem";
 
