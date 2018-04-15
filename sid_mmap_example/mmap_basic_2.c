@@ -15,7 +15,7 @@ int main()
    char buf[40];
    char *ptr;
  
-   int fd = open("/dev/demo",O_RDWR);
+   int fd = open("/dev/pmap",O_RDWR);
    if(fd < 0){
        perror("open");
        exit(-1);

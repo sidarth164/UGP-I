@@ -15,7 +15,7 @@ int main()
    char buf[40];
    char *ptr;
  
-   int fd = open("/dev/demo",O_RDWR);
+   int fd = open("/dev/pmap",O_RDWR);
    if(fd < 0){
        perror("open");
        exit(-1);
@@ -29,17 +29,17 @@ int main()
   
   printf("Process mmap_basic\n");
 
-  memcpy(ptr, "hellokern",10);
+  // memcpy(ptr, "hellokern",10);
   memcpy(buf, ptr, 10);
   printf("Read 1 %s\n", buf);
 
-  memcpy(ptr+25000, "kernhello",10);
+  // memcpy(ptr+25000, "kernhello",10);
   memcpy(buf, ptr+25000, 10);
   printf("Read II %s\n", buf);
 
   /* Waiting for a dummy input - mainly to pause the process */
   scanf("%s", buf);
-  munmap(ptr, 53428);
+  //munmap(ptr, 53428);
   close(fd);
   return 0;  
 }
