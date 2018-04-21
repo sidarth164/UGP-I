@@ -10,45 +10,47 @@
 
 #include "syschar.h"
 
-#define MAX_LIST_SIZE 1024	// Maximum number of nodes the list can contain
+#define MAX_LIST_SIZE 32768	// Maximum number of nodes the list can contain (1024*32=32768)
 #define PAGE_SIZE 4096
 #define HEAD NULL
-#define P_NODE_SIZE 20
+#define P_NODE_SIZE 24
 
 // STRUCTURES
-struct free_mem_list {
-	void *mem;
-	struct free_mem_list *next, *prev;
-};
+// struct free_mem_list {
+// 	void *mem;
+// 	struct free_mem_list *next, *prev;
+// };
 
 struct p_node {
 	char *data;
-	int key;
+	unsigned long key;
 	struct p_node *next;
 };
 
 // GLOBAL VARIABLES
 struct p_node *head = HEAD;
 void *pmem;
-struct free_mem_list *free_head = HEAD;
+void *free_head = HEAD;
 
 // FUNCTION PROTOTYPES
-struct free_mem_list* create_free_memlist(void *memory, int size);
+//void create_free_memlist(void *memory, int size);
 void* get_free_memory(void);
 void add_free_memlist(void *memory);
-void add_pnode(char* data, int key);
-void delete_pnode(int key);
-struct p_node* search_pnode(int key);
+void add_pnode(char* data, unsigned long key);
+void delete_pnode(unsigned long key);
+struct p_node* search_pnode(unsigned long key);
+void modify_pnode(unsigned long key, char *data);
 void flush_list(void);
-void free_freememlist(void);
+// void free_freememlist(void);
 void restore_list(void);
 
 // MAIN
 int main()
 {
+	unsigned long i,num;
 	char* meta;
 	char isPers[7];
-	struct p_node *search;
+	struct p_node *search = NULL;
 	int fd = open("/dev/pmap", O_RDWR);
 	if(fd<0){
 		perror("Error in opening character device /dev/pmap\n");
@@ -64,40 +66,49 @@ int main()
 	}
 	else
 		printf("mmap successfull\n");
+	
+	scanf("%lu", &num);
 
 	meta = (char*)pmem;
+	char * buf=(char*)pmem;
 	memcpy(isPers, meta, 7);
 	printf("isPers = %s\n", isPers);
 
 	if(!strcmp(isPers, "pmlist")){
 		printf("\nList is already present in the memory\n\n");
 		head = (struct p_node *)(pmem +7);
+		// memcpy(meta, "pmfree", 7);
 		
 		restore_list();
 
-		printf("\nSearching Node with key 6\n");
-		search = search_pnode(6);
-		if(search)
-			printf("Node 6 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 6 not found in the list\n");
-	
-		printf("\nSearching Node with key 2\n");
-		search = search_pnode(2);
-		if(search)
-			printf("Node 2 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 2 not found in the list\n");
-	
-		printf("\nSearching Node with key 19\n");
-		search = search_pnode(19);
-		if(search)
-			printf("Node 19 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 19 not found in the list\n");
+		for(i=1; i<num; i+=1){
+			unsigned long index = rand() % 10000;
+			if (index == 0) index++;
+			char data[10];
+			printf("\nSearching Node with key %lu\n", index);
+			search = search_pnode(index);
+			if(search){
+				memcpy(data, search->data, 100);
+				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, data);
+			}
+			else
+				printf("Node %lu not found in the list\n", i);
+		}
+		for(i=1; i<num/2; i++){
+			unsigned long index = rand() % 10000;
+			if (index == 0) index ++;
+			char data[100];
+			sprintf(data, "We have modified the data of this node with key %lu\n", index);
+			printf("\nModifying Node with key %lu\n", index);
+			modify_pnode(index, data);
+		}
 
-		flush_list();
-		free_freememlist();
+
+		// flush_list();
+		// free_freememlist();
+
+		// memcpy(buf, "pmfree", 7);
+		// munmap(pmem, MAX_LIST_SIZE * PAGE_SIZE);
 		return 0;
 	}
 	else {
@@ -110,135 +121,96 @@ int main()
 		// Data available for normal nodes = 4096-20-8 = 4068 bytes
 		head->key = 0;
 		head->next = NULL;
-		head->data = (char *)(pmem + 6 + P_NODE_SIZE + sizeof(struct p_node *));
+		head->data = (char *)(pmem + 7 + P_NODE_SIZE + sizeof(struct p_node *));
 		memcpy(head->data, "This is the head", strlen("This is the head")+1);
 		printf("Linked list with a single node - head, made successfully\n");
 	
-		free_head = create_free_memlist(pmem + PAGE_SIZE, MAX_LIST_SIZE-1);
+		free_head = pmem + PAGE_SIZE;
+		// create_free_memlist(pmem + PAGE_SIZE, MAX_LIST_SIZE-1);
 		printf("Free list for storing free memory created successfully\n");
 
-		// printf("Adding a node with key = 1\n");
-		add_pnode("This is the second node, its key is 1",1);
-		// printf("%s\n", head->next->data);
-	
-		// printf("Deleting the node with key = 1\n");
-		delete_pnode(1);
-	
-		// printf("Adding a node with key = 8\n");
-		add_pnode("Dummy node #1",8);
-	
-		// printf("Adding a node with key = 10\n");
-		add_pnode("Dummy node #2",10);
-	
-		// printf("Adding a node with key = 6\n");
-		add_pnode("This node is used to check search", 6);
-	
-		// printf("Adding a node with key = 2\n");
-		add_pnode("Dummy node #3",2);
-	
-		// printf("Adding a node with key = 4\n");
-		add_pnode("Dummy node #4",4);
-	
-		// printf("Adding a node with key = 19\n");
-		add_pnode("Dummy node #5",19);
-	
-		printf("\nSearching Node with key 6\n");
-		search = search_pnode(6);
-		if(search)
-			printf("Node 6 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 6 not found in the list\n");
-	
-		printf("\nSearching Node with key 2\n");
-		search = search_pnode(2);
-		if(search)
-			printf("Node 2 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 2 not found in the list\n");
-	
-		printf("\nSearching Node with key 19\n");
-		search = search_pnode(19);
-		if(search)
-			printf("Node 19 found in the list!!\nIt has the following data\n%s\n", search->data);
-		else
-			printf("Node 19 not found in the list\n");
-	
-		flush_list();
-		free_freememlist();
+		for(i=1; i<10000; i++){
+			char data[100];
+			sprintf(data, "This is a node of a persistent linked list\nIt's key value is %lu\n", i);
+			// printf("Adding Node %lu\n", i);
+			add_pnode(data,i);
+		}
+
+		for(i=100; i<40000; i+=100){
+			printf("\nSearching Node with key %lu\n", i);
+			search = search_pnode(i);
+			if(search == NULL)
+				printf("Node %lu not found in the list\n", i);
+			else
+				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, search->data);
+		}
+
+		// flush_list();
+		// free_freememlist();
+
+		// memcpy(buf, "pmfree", 7);
+		// munmap(pmem, MAX_LIST_SIZE * PAGE_SIZE);
 		return 0;
 	}
 }
 
 //FUNCTION DEFINITIONS
-struct free_mem_list* create_free_memlist(void *memory, int size)
-{
-	struct free_mem_list *head, *it;
-	int i;
-	char* buf;
-	head = (struct free_mem_list*) malloc(sizeof(struct free_mem_list));
-	head->mem = memory;
-	head->next = NULL;
-	head->prev = NULL;
-	it = head;
-	memory += 4096;
-	for(i=1;i<size;i++){
-		struct free_mem_list *temp = (struct free_mem_list *) malloc(sizeof(struct free_mem_list));
-		temp->mem = memory;
-		temp->next = NULL;
-		temp->prev = it;
-		buf = (char*) memory;
-		memcpy(buf, "This is free", strlen("This is free")+1);
-		it->next = temp;
-		it = temp;
-		memory += 4096;
-	}
-
-	return head;
-}
 
 void* get_free_memory(void)
 {
-	struct free_mem_list *tmp = free_head;
-	if(tmp == NULL){
-		perror("No more free memory\n");
-		exit(-1);
+	void *memory = free_head;
+	int flag = 0;
+	void *next = free_head + 4096;
+	if(next > pmem + MAX_LIST_SIZE * PAGE_SIZE){
+		next = pmem + 4096;
+		flag = 1;
 	}
 
-	void* mem = tmp->mem;
-	
-	free_head = free_head->next;
-	free_head->prev = NULL;
-	free(tmp);
-	
-	return mem;
+	while(1){
+		char* buf, ssfree[7];
+		buf = (char*) next;
+		memcpy(ssfree, buf, strlen("ssused")+1);
+		if(strcmp(ssfree,"ssused") && strcmp (ssfree, "pmlist"))
+			break;
+
+		next += 4096;
+		if(next > pmem + MAX_LIST_SIZE * PAGE_SIZE){
+			if(flag){
+				free_head = NULL;
+				perror("No more memory present\n");
+				exit(-1);
+			}
+			next = pmem + 4096;
+			flag = 1;
+		}
+	}
+
+	free_head = next;
+	return memory;
 }
 
 void add_free_memlist(void *memory)
 {
-	struct free_mem_list* tmp = (struct free_mem_list*) malloc(sizeof(struct free_mem_list));
 	char* buf;
-	tmp->mem = memory;
-	tmp->next = free_head;
 	buf = (char*) memory;
-	memcpy(buf, "This is free", strlen("This is free")+1);
-	tmp->prev = NULL;
-	if(free_head)
-		free_head->prev = tmp;
-	free_head = tmp;
+	memcpy(buf, "ssfree", strlen("ssfree")+1);
 }
 
-void add_pnode(char* data, int key)
+void add_pnode(char* data, unsigned long key)
 {
 	struct p_node *node, *it;
-	void *memory = get_free_memory();
+	void *memory;
+	// printf("Got memory for key %lu\n", key);
+	memory= get_free_memory();
+	char *meta = (char*) memory;
+	memcpy(meta, "ssused", 7);	
 
-	node = (struct p_node*)memory;
+	node = (struct p_node*)(memory+7);
 	node->key = key;
 	node->next = NULL;
-	node->data = (char*)(memory + P_NODE_SIZE + sizeof(struct p_node *));
+	node->data = (char*)(memory + 7 + P_NODE_SIZE + sizeof(struct p_node *));
 
 	memcpy(node->data, data, strlen(data)+1);
-//	printf("Added node %d\nIt has the following data\n%s\n", node->key, node->data);
 
 	it = head;
 	while(it->next){
@@ -248,7 +220,7 @@ void add_pnode(char* data, int key)
 	it->next = node;
 }
 
-void delete_pnode(int key)
+void delete_pnode(unsigned long key)
 {
 	struct p_node *node = head;
 	struct p_node *prev_node = NULL;
@@ -257,36 +229,50 @@ void delete_pnode(int key)
 		if(node->key == key){
 			/* deleting the node by sending the memory  back to free list */
 			mem = (void*)node;
-			printf("Deleting node %d\nIt has the following data\n%s\n", node->key, node->data);
+			printf("Deleting node %lu\nIt has the following data\n%s\n", node->key, node->data);
 			
 			if(prev_node)
 				prev_node->next = node->next;
 			else
 				head = node->next;
 	
-			add_free_memlist(mem);
+			add_free_memlist(mem-7);
 			return;
 		}
 		prev_node = node;
 		node = node->next;
 	}
-	printf("Node %d not found in the list\n", key);
+	printf("Node %lu not found in the list\n", key);
 }
 
-struct p_node* search_pnode(int key)
+struct p_node* search_pnode(unsigned long key)
 {
 	struct p_node *node = head;
 	while(node){
 		if(node->key == key){
 			/* Search for the node was successfull */
-			printf("node %d successfully found\nIt has the following data\n%s\n", node->key, node->data);
-	
+			printf("Search successfull\n");
 			return node;
 		}
 		node = node->next;
 	}
-	printf("Did not find node %d in the list\n", key);
+	printf("Search unsuccessfull\n");
 	return NULL;
+}
+
+void modify_pnode(unsigned long key, char *data)
+{
+	struct p_node *node = head;
+	while(node){
+		if(node->key == key){
+			/* Search for the node was successfull */
+			memcpy(node->data, data, strlen(data)+1);
+			printf("Modification successfull\n");
+			return;
+		}
+		node = node->next;
+	}
+	printf("Modification unsuccessfull\n");
 }
 
 void flush_list()
@@ -296,26 +282,12 @@ void flush_list()
 	printf("\nFlushing all the nodes in the linked list (except the head)\n");
 	while(node){
 		mem = (void*)node;
-		printf("Deleting node %d\nIt has the following data\n%s\n", node->key, node->data);
+		printf("Deleting node %lu\nIt has the following data\n%s\n", node->key, node->data);
 		
 		node = node->next;
 
-		add_free_memlist(mem);
+		add_free_memlist(mem-7);
 	}
-}
-
-void free_freememlist(){
-	struct free_mem_list* tmp;
-	char* buf = (char*) pmem;
-	printf("freeing the free_mem_list\n");
-	while(free_head){
-		tmp = free_head;
-		free_head = free_head->next;
-		free(tmp);
-	}
-
-	memcpy(buf, "pmfree", 7);
-	munmap(pmem, MAX_LIST_SIZE * PAGE_SIZE);
 }
 
 void restore_list()
@@ -323,12 +295,15 @@ void restore_list()
 	void *memory = pmem + PAGE_SIZE;
 	int i;
 	char*buf;
-	char isFree[13];
+	char meta[7];
 	for(i=0;i<MAX_LIST_SIZE-1;i++){
 		buf = (char*) memory;
-		memcpy(isFree, buf, 13);
-		if(!strcmp(isFree, "This is free"))
-			add_free_memlist(memory);
+		memcpy(meta, buf, 7);
+//		printf("%s\n",meta);
+		if(strcmp(meta, "ssused") && strcmp(meta, "pmlist")){
+			free_head = memory;
+			return;
+		}
 		
 		memory += PAGE_SIZE;
 	}

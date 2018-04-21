@@ -1,3 +1,2 @@
 kernel//home/sidarth/pmem/module/persmem.ko
-kernel//home/sidarth/pmem/module/pcall.ko
 kernel//home/sidarth/pmem/module/flush.ko
