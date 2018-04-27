@@ -47,7 +47,7 @@ void restore_list(void);
 // MAIN
 int main()
 {
-	unsigned long i,num;
+	unsigned long i;
 	char* meta;
 	char isPers[7];
 	struct p_node *search = NULL;
@@ -67,7 +67,7 @@ int main()
 	else
 		printf("mmap successfull\n");
 	
-	scanf("%lu", &num);
+//	scanf("%lu", &num);
 
 	meta = (char*)pmem;
 	char * buf=(char*)pmem;
@@ -75,32 +75,89 @@ int main()
 	printf("isPers = %s\n", isPers);
 
 	if(!strcmp(isPers, "pmlist")){
-		printf("\nList is already present in the memory\n\n");
+		printf("\nList is already present in the memory\n");
 		head = (struct p_node *)(pmem +7);
 		// memcpy(meta, "pmfree", 7);
 		
 		restore_list();
 
-		for(i=1; i<num; i+=1){
-			unsigned long index = rand() % 10000;
-			if (index == 0) index++;
-			char data[10];
-			printf("\nSearching Node with key %lu\n", index);
-			search = search_pnode(index);
-			if(search){
-				memcpy(data, search->data, 100);
-				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, data);
+//		for(i=1; i<5000; i+=1){
+//			unsigned long index = rand() % 10000;
+//			if (index == 0) index++;
+//			char data[100];
+//			printf("\nSearching Node with key %lu\n", index);
+//			search = search_pnode(index);
+//			if(search){
+//				memcpy(data, search->data, 100);
+//				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, data);
+//			}
+//			else
+//				printf("Node %lu not found in the list\n", i);
+//		}
+//		for(i=1; i<1000; i++){
+//			unsigned long index = rand() % 10000;
+//			if (index == 0) index ++;
+//			char data[100];
+//			sprintf(data, "We have modified the data of this node with key %lu\n", index);
+//			printf("\nModifying Node with key %lu\n", index);
+//			modify_pnode(index, data);
+//		}
+
+		/* User Input Search, Modify, Delete and Add Nodes */
+		int opt, key;
+		char data[100];
+		while(1){
+			printf("\n\nSelect option [1-5]:\n");
+			printf("1] Add a node\n");
+			printf("2] Delete a node\n");
+			printf("3] Search a node\n");
+			printf("4] Modify a node\n");
+			printf("5] Exit\n");
+			scanf("%d", &opt);
+			switch(opt){
+				case 1: // Add node
+					printf("\n\n-----------------------------------------------\n");
+					printf("Adding a node\n");
+					printf("Enter the key for the node to be added\n");
+					scanf("%d", &key);
+					printf("Enter the data to be fed to the node with key %d\n", key);
+					getchar();
+					fgets(data, 100, stdin);
+					add_pnode(data, key);
+					break;
+				case 2: // Delete Node
+					printf("\n\n-----------------------------------------------\n");
+					printf("Deleting a node\n");
+					printf("Enter the key for the node to be deleted\n");
+					scanf("%d", &key);
+					delete_pnode(key);
+					break;
+				case 3: // Searching for a node
+					printf("\n\n-----------------------------------------------\n");
+					printf("Searching a node\n");
+					printf("Enter the key for the node to be searched\n");
+					scanf("%d", &key);
+					search = search_pnode(key);
+					if(search){
+						memcpy(data, search->data, 100);
+						printf("Search Result:\n%s\n", data);
+					}
+					break;
+				case 4: // Modify a node
+					printf("\n\n-----------------------------------------------\n");
+					printf("Modifying a node\n");
+					printf("Enter the key for the node to be modified\n");
+					scanf("%d", &key);
+					printf("Enter the modified data\n");
+					getchar();
+					fgets(data, 100, stdin);
+					modify_pnode(key, data);
+					break;
+				case 5: // Exiting
+					return 0;
+				default:
+					printf("\nSelect a correct option\n");
 			}
-			else
-				printf("Node %lu not found in the list\n", i);
-		}
-		for(i=1; i<num/2; i++){
-			unsigned long index = rand() % 10000;
-			if (index == 0) index ++;
-			char data[100];
-			sprintf(data, "We have modified the data of this node with key %lu\n", index);
-			printf("\nModifying Node with key %lu\n", index);
-			modify_pnode(index, data);
 		}
 
 
@@ -136,14 +193,14 @@ int main()
 			add_pnode(data,i);
 		}
 
-		for(i=100; i<40000; i+=100){
-			printf("\nSearching Node with key %lu\n", i);
-			search = search_pnode(i);
-			if(search == NULL)
-				printf("Node %lu not found in the list\n", i);
-			else
-				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, search->data);
-		}
+//		for(i=100; i<40000; i+=100){
+//			printf("\nSearching Node with key %lu\n", i);
+//			search = search_pnode(i);
+//			if(search == NULL)
+//				printf("Node %lu not found in the list\n", i);
+//			else
+//				printf("Node %lu found in the list!!\nIt has the following data\n%s\n", search->key, search->data);
+//		}
 
 		// flush_list();
 		// free_freememlist();
